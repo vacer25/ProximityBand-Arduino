@@ -19,7 +19,6 @@ Adafruit_BluefruitLE_UART ble(bluetoothSS, BLUEFRUIT_UART_MODE_PIN, BLUEFRUIT_UA
 
 // -------------------- BLUETOOTH CONNECTION --------------------
 
-#define bluetoothConnectionTimeout 300000
 unsigned long lastBluetoothDataInTime = 0;
 boolean bluetoothConnected = false;
 
@@ -34,6 +33,8 @@ static const byte settings_version = B00000010;
 // 1        1       Saved currentLEDBrightness
 
 // -------------------- TIMINGS --------------------
+
+#define BLUETOOTH_CONNECTION_TIMEOUT 1000
 
 #define STARTUP_DELAY_TIME 1000
 

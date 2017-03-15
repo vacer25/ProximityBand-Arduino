@@ -63,7 +63,7 @@ void getUserInputs() {
 
 void updateStatus() {
 
-  if (bluetoothConnected && millis() - lastBluetoothDataInTime > bluetoothConnectionTimeout) {
+  if (bluetoothConnected && millis() - lastBluetoothDataInTime > BLUETOOTH_CONNECTION_TIMEOUT) {
     bluetoothConnected = false;
     activateOutOfRangeAlarm();
   }
