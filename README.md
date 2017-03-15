@@ -36,9 +36,16 @@ Button Pressed Command    		=	B1
 Button Unpressed Command  		=	B0
 
 <b>Determining if the Bluetooth connection is active:</b>
-If any data is recieved, a timer is set for 30 second (will be chaged to 3 seconds).
+If any data is recieved, a timer is set for 1 second.
 If no other data is recieved after the timer is done, this means that the connection is not active.
 In this case the alarm will be acivated.
+</pre>
+<b>Setting the LEDs brightness:</b>
+While the device is disconnected, press and hold the button.
+All three LEDs will light up.
+Set the switch to position 1-2-3 for max-medium-min LED brightness.
+Let go of the button and the change is saved to memory.
+The brightness is retained even after the device is turned off.
 </pre>
 <pre>
 <b>TODO:</b>
