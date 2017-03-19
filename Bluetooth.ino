@@ -2,10 +2,22 @@ void getBluetoothData() {
 
   //attemptBluetoothConnection();
 
-  while ( ble.available() )  {
+  unsigned long currentMillis = millis();
+
+  while (ble.available() /* || Serial.available() */)  {
+
+    if (!bluetoothConnected) {
+      stopWaitingConnectionLEDFlasing();
+    }
+
     lastBluetoothDataInTime = millis();
     bluetoothConnected = true;
     int currentReadChar = ble.read();
+    /*
+    if (currentReadChar == 0 || currentReadChar == -1) {
+      currentReadChar = Serial.read();
+    }
+    */
     //Serial.print((char)c);
 
     // -------------------- LEDs ON --------------------
@@ -36,12 +48,15 @@ void getBluetoothData() {
 
     if (currentReadChar == redLEDFlashOnCommand) {
       rgbLEDFlashAciveStatus[0] = true;
+      rgbLEDFlashTimes[0] = currentMillis;
     }
     else if (currentReadChar == greenLEDFlashOnCommand) {
       rgbLEDFlashAciveStatus[1] = true;
+      rgbLEDFlashTimes[1] = currentMillis;
     }
     else if (currentReadChar == blueLEDFlashOnCommand) {
       rgbLEDFlashAciveStatus[2] = true;
+      rgbLEDFlashTimes[2] = currentMillis;
     }
 
     // -------------------- LEDs Flash OFF --------------------
@@ -70,8 +85,11 @@ void getBluetoothData() {
 
     // -------------------- ALARM --------------------
 
-    else if (currentReadChar == alarmCommand) {
-      activateOutOfRangeAlarm();
+    else if (currentReadChar == alarmOnCommand) {
+      alarmIsActive = true;
+    }
+    else if (currentReadChar == alarmOffCommand) {
+      alarmIsActive = false;
     }
 
   }
@@ -79,6 +97,10 @@ void getBluetoothData() {
 }
 
 void sendBluetoothData() {
+
+  if (!bluetoothConnected) {
+    return;
+  }
 
   if (!switchIsBeingSwitched && prev_switchStatus != switchStatus) {
 
@@ -130,7 +152,8 @@ void initilizeBluetooth() {
   sendLEDWave(true, STARTUP_LED_SCAN_SPEED);
   //Serial.print(F("Initialising the Bluetooth LE module: "));
   if ( !ble.begin(VERBOSE_MODE) ) {
-    error(F("Couldn't find module!"));
+    initilizeBluetooth();
+    //error(F("Couldn't find module!"));
   }
   //Serial.println( F("OK!") );
 
@@ -144,5 +167,8 @@ void initilizeBluetooth() {
   // Set module to DATA mode
   //Serial.println( F("Switching to DATA mode!") );
   ble.setMode(BLUEFRUIT_MODE_DATA);
+
+  setupWaitingConnectionLEDFlasing();
+
 
 }

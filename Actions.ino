@@ -1,46 +1,95 @@
-void activateOutOfRangeAlarm() {
+void checkAlarm() {
 
-  for (int repeat1Counter = 0; repeat1Counter < 3; repeat1Counter++) {
+  unsigned long currentMillis = millis();
 
-    for (int repeat2Counter = 0; repeat2Counter < 5; repeat2Counter++) {
+  if (alarmIsActive) {
 
-      if (stopAlarmWithButton()) {
-        break;
-      }
+    //Serial.print("Cheking active alarm at: ");
+    //Serial.println(currentMillis);
 
+    if (!prev_alarmIsActive) {
+      prev_alarmSwitchTime = currentMillis;
+      alarmIsInHighState = true;
       digitalWrite(motorPin, HIGH);
       turnOnAllLEDs();
-
-      if (stopAlarmWithButton()) {
-        break;
-      }
-      delay(MOTOR_LONG_PULSE);
-      if (stopAlarmWithButton()) {
-        break;
-      }
-
-      digitalWrite(motorPin, LOW);
-      turnOffAllLEDs();
-
-      if (stopAlarmWithButton()) {
-        break;
-      }
-      delay(MOTOR_SHORT_PULSE);
-
+      //Serial.print("Initial alarm started at: ");
+      //Serial.println(prev_alarmSwitchTime);
     }
+    else {
 
-    if (stopAlarmWithButton()) {
-      break;
-    }
-    delay(1000);
-    if (stopAlarmWithButton()) {
-      break;
+      if (alarmIsInHighState) {
+        if (currentMillis - prev_alarmSwitchTime > ALARM_ON_INTERVAL) {
+          prev_alarmSwitchTime = currentMillis;
+          alarmIsInHighState = false;
+          digitalWrite(motorPin, LOW);
+          turnOffAllLEDs();
+          //Serial.print("Alarm was ON, turning OFF at: ");
+          //Serial.println(prev_alarmSwitchTime);
+        }
+      }
+      else {
+        if (currentMillis - prev_alarmSwitchTime > ALARM_OFF_INTERVAL) {
+          prev_alarmSwitchTime = currentMillis;
+          alarmIsInHighState = true;
+          digitalWrite(motorPin, HIGH);
+          turnOnAllLEDs();
+          //Serial.print("Alarm was OFF, turning ON at: ");
+          //Serial.println(prev_alarmSwitchTime);
+        }
+      }
+
     }
 
   }
+  else if (!alarmIsActive && prev_alarmIsActive) {
+    digitalWrite(motorPin, LOW);
+    turnOffAllLEDs();
+    //Serial.println("Turning alarm OFF");
+  }
 
-  digitalWrite(motorPin, LOW);
-  turnOffAllLEDs();
+  /*
+    for (int repeat1Counter = 0; repeat1Counter < 3; repeat1Counter++) {
+
+      for (int repeat2Counter = 0; repeat2Counter < 5; repeat2Counter++) {
+
+        if (stopAlarmWithButton()) {
+          break;
+        }
+
+        //digitalWrite(motorPin, HIGH);
+        turnOnAllLEDs();
+
+        if (stopAlarmWithButton()) {
+          break;
+        }
+        delay(MOTOR_LONG_PULSE);
+        if (stopAlarmWithButton()) {
+          break;
+        }
+
+        digitalWrite(motorPin, LOW);
+        turnOffAllLEDs();
+
+        if (stopAlarmWithButton()) {
+          break;
+        }
+        delay(MOTOR_SHORT_PULSE);
+
+      }
+
+      if (stopAlarmWithButton()) {
+        break;
+      }
+      delay(1000);
+      if (stopAlarmWithButton()) {
+        break;
+      }
+
+    }
+
+    digitalWrite(motorPin, LOW);
+    turnOffAllLEDs();
+    */
 
 }
 
@@ -53,23 +102,17 @@ void updateRgbLEDFlashing() {
 
     if (!rgbLEDFlashAciveStatus[index] && prev_rgbLEDFlashAciveStatus[index]) {
       setLED(false, index);
-      rgbLEDStatus[index] = 0;
     }
+    else if (rgbLEDFlashAciveStatus[index]) {
+      if (currentMillis >= rgbLEDFlashTimes[index] || currentMillis < STARTUP_DELAY_TIME) {
 
-    if (rgbLEDFlashAciveStatus[index]) {
-      boolean flashLEDNow = false;
-      if (rgbLEDStatus[index]) {
-        if (currentMillis - rgbLEDFlashTimes[index] > LED_FLASH_ON_INTERVAL) {
-          flashLEDNow = true;
+        if (rgbLEDStatus[index]) {
+          rgbLEDFlashTimes[index] = currentMillis + LED_FLASH_OFF_INTERVAL;
         }
-      }
-      else {
-        if (currentMillis - rgbLEDFlashTimes[index] > LED_FLASH_OFF_INTERVAL) {
-          flashLEDNow = true;
+        else {
+          rgbLEDFlashTimes[index] = currentMillis + LED_FLASH_ON_INTERVAL;
         }
-      }
-      if (flashLEDNow) {
-        rgbLEDFlashTimes[index] = currentMillis;
+
         setLED(!rgbLEDStatus[index], index);
         //rgbLEDStatus[index] = !rgbLEDStatus[index];
       }
@@ -99,6 +142,32 @@ void sendLEDWave(boolean activateMotor, int delayTime)  {
 
   delay(3000);
 
+}
+
+void setupWaitingConnectionLEDFlasing() {
+
+  unsigned long currentMillis = millis();
+
+  turnOffAllLEDs();
+
+  rgbLEDFlashAciveStatus[0] = true;
+  rgbLEDFlashAciveStatus[1] = true;
+  rgbLEDFlashAciveStatus[2] = true;
+
+  rgbLEDFlashTimes[0] = currentMillis;
+  rgbLEDFlashTimes[1] = currentMillis + (LED_FLASH_ON_INTERVAL + LED_FLASH_OFF_INTERVAL) - WAITING_CONNECTION_LED_SCAN_INTERVAL;
+  rgbLEDFlashTimes[2] = currentMillis + (2 * LED_FLASH_ON_INTERVAL + 2 * LED_FLASH_OFF_INTERVAL) - 2 * WAITING_CONNECTION_LED_SCAN_INTERVAL;
+
+}
+
+void stopWaitingConnectionLEDFlasing() {
+
+  turnOffAllLEDs();
+
+  rgbLEDFlashAciveStatus[0] = false;
+  rgbLEDFlashAciveStatus[1] = false;
+  rgbLEDFlashAciveStatus[2] = false;
+  
 }
 
 void turnOffAllLEDs() {

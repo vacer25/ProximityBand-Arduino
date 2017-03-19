@@ -21,6 +21,7 @@ Adafruit_BluefruitLE_UART ble(bluetoothSS, BLUEFRUIT_UART_MODE_PIN, BLUEFRUIT_UA
 
 unsigned long lastBluetoothDataInTime = 0;
 boolean bluetoothConnected = false;
+//boolean prev_bluetoothConnected = false;
 
 // -------------------- EEPROM --------------------
 
@@ -45,10 +46,22 @@ static const byte settings_version = B00000010;
 #define MOTOR_LONG_PULSE 500
 
 #define STARTUP_LED_SCAN_SPEED 500
-#define WAITING_CONNECTION_LED_SCAN_SPEED 100
+#define WAITING_CONNECTION_LED_SCAN_INTERVAL 1000
 
 #define LED_FLASH_ON_INTERVAL 100
 #define LED_FLASH_OFF_INTERVAL 1000
+
+#define ALARM_ON_INTERVAL 500
+#define ALARM_OFF_INTERVAL 250
+
+// -------------------- ALARM --------------------
+
+boolean alarmIsActive = false;
+boolean prev_alarmIsActive = false;
+boolean alarmIsInHighState = false;
+
+unsigned long prev_alarmSwitchTime = 0;
+unsigned long prev_alarmRepeatTime = 0;
 
 // -------------------- PINS --------------------
 
@@ -73,7 +86,6 @@ boolean prev_buttonIsPressed = 0;
 byte switchStatus = 0;
 byte temp_switchStatus = 0;
 byte prev_switchStatus = 0;
-
 
 unsigned long switchInteractionTime = 0;
 boolean switchIsBeingSwitched = false;
@@ -128,12 +140,13 @@ unsigned long prev_rgbLEDFlashTime = 0;
 #define motorMediumCommand      '2'
 #define motorLongCommand        '3'
 
-#define alarmCommand            'X'
+#define alarmOnCommand          'X'
+#define alarmOffCommand         'x'
 
 void setup(void) {
 
   delay(STARTUP_DELAY_TIME);
-  
+
   // -------------------- PINS --------------------
 
   pinMode(buttonPin, INPUT);
@@ -152,9 +165,9 @@ void setup(void) {
 
   Serial.begin(115200);
   initilizeBluetooth();
-  
+
   // -------------------- EEPROM --------------------
-  
+
   loadEEPROMData();
 
 }
@@ -164,7 +177,8 @@ void loop(void) {
   getBluetoothData();
   processUserInteraction();
   sendBluetoothData();
-  
+
+  checkAlarm();
   updateRgbLEDFlashing();
 
   updateMotorStatus();
@@ -177,4 +191,26 @@ void loop(void) {
 void error(const __FlashStringHelper*err) {
   Serial.println(err);
   while (1);
+}
+
+void updateStatus() {
+
+  if (bluetoothConnected && millis() - lastBluetoothDataInTime > BLUETOOTH_CONNECTION_TIMEOUT) {
+    stopWaitingConnectionLEDFlasing();
+    bluetoothConnected = false;
+    alarmIsActive = true;
+  }
+
+  prev_switchStatus = switchStatus;
+  prev_buttonIsPressed =  buttonIsPressed;
+
+  prev_motorIsOn = motorIsOn;
+  for (int index = 0; index < 3; index++) {
+    prev_rgbLEDStatus[index] = rgbLEDStatus[index];
+    prev_rgbLEDFlashAciveStatus[index] = rgbLEDFlashAciveStatus[index];
+  }
+
+  //prev_bluetoothConnected = bluetoothConnected;
+  prev_alarmIsActive = alarmIsActive;
+
 }

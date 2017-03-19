@@ -1,15 +1,21 @@
 void processUserInteraction() {
 
+  unsigned long currentMillis = millis();
+
   getUserInputs();
+
+  if (alarmIsActive) {
+    checkToStopAlarmWithButton();
+  }
 
   if (!bluetoothConnected) {
 
     if (!buttonIsPressed) {
       if (prev_buttonIsPressed) {
-        turnOffAllLEDs();
         EEPROM_writeAnything(1, currentLEDBrightness);
+        setupWaitingConnectionLEDFlasing();
       }
-      sendLEDWave(false, WAITING_CONNECTION_LED_SCAN_SPEED);
+      //sendLEDWave(false, WAITING_CONNECTION_LED_SCAN_SPEED);
     }
     else {
       if (!switchStatus) {
@@ -61,24 +67,8 @@ void getUserInputs() {
 
 }
 
-void updateStatus() {
-
-  if (bluetoothConnected && millis() - lastBluetoothDataInTime > BLUETOOTH_CONNECTION_TIMEOUT) {
-    bluetoothConnected = false;
-    activateOutOfRangeAlarm();
+boolean checkToStopAlarmWithButton() {
+  if (buttonIsPressed) {
+    alarmIsActive = false;
   }
-
-  prev_switchStatus = switchStatus;
-  prev_buttonIsPressed =  buttonIsPressed;
-
-  prev_motorIsOn = motorIsOn;
-  for (int index = 0; index < 3; index++) {
-    prev_rgbLEDStatus[index] = rgbLEDStatus[index];
-    prev_rgbLEDFlashAciveStatus[index] = rgbLEDFlashAciveStatus[index];
-  }
-
-}
-
-boolean stopAlarmWithButton() {
-  return digitalRead(buttonPin);
 }
