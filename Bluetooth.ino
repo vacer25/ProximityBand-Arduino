@@ -163,6 +163,7 @@ void initilizeBluetooth() {
   // Change Mode LED Activity
   //Serial.println(F("Change LED activity to MODE"));
   ble.sendCommandCheckOK("AT+HWModeLED=MODE");
+  ble.sendCommandCheckOK("AT+GAPDEVNAME=Proximity Band");
 
   // Set module to DATA mode
   //Serial.println( F("Switching to DATA mode!") );
