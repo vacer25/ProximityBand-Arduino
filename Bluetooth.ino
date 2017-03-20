@@ -92,6 +92,13 @@ void getBluetoothData() {
       alarmIsActive = false;
     }
 
+    // -------------------- ACKNOLEGDEMENT --------------------
+
+    else if (currentReadChar == ackCommand) {
+      didReceiveAck = true;
+      lastCommandSend = -1;
+    }
+
   }
 
 }
@@ -102,26 +109,36 @@ void sendBluetoothData() {
     return;
   }
 
-  if (!switchIsBeingSwitched && prev_switchStatus != switchStatus) {
+  if ((!switchIsBeingSwitched && prev_switchStatus != switchStatus)  || !didReceiveAck) {
 
-    if (!switchStatus) {
+    if (!switchStatus || (!didReceiveAck && lastCommandSend == 0)) {
       ble.println("" switchPosition1Command);
+      didReceiveAck = false;
+      lastCommandSend = 0;
     }
-    else if (switchStatus == 1) {
+    else if (switchStatus == 1 || (!didReceiveAck && lastCommandSend == 1)) {
       ble.println(""switchPosition2Command);
+      didReceiveAck = false;
+      lastCommandSend = 1;
     }
-    else {
+    else if (switchStatus == 2 || (!didReceiveAck && lastCommandSend == 2)) {
       ble.println("" switchPosition3Command);
+      didReceiveAck = false;
+      lastCommandSend = 2;
     }
 
   }
 
-  if (buttonIsPressed != prev_buttonIsPressed) {
+  if (buttonIsPressed != prev_buttonIsPressed || (!didReceiveAck && lastCommandSend == 3)) {
     if (buttonIsPressed) {
       ble.println("" buttonPressedCommand);
+      didReceiveAck = false;
+      lastCommandSend = 3;
     }
-    else {
+    else if (!buttonIsPressed || (!didReceiveAck && lastCommandSend == 4)) {
       ble.println("" buttonUnpressedCommand);
+      didReceiveAck = false;
+      lastCommandSend = 4;
     }
   }
 

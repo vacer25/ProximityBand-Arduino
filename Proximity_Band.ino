@@ -115,6 +115,9 @@ unsigned long prev_rgbLEDFlashTime = 0;
 
 // -------------------- COMMANDS --------------------
 
+boolean didReceiveAck = false;
+int lastCommandSend = -1;
+
 #define switchPosition1Command  "S1"
 #define switchPosition2Command  "S2"
 #define switchPosition3Command  "S3"
@@ -142,6 +145,8 @@ unsigned long prev_rgbLEDFlashTime = 0;
 
 #define alarmOnCommand          'X'
 #define alarmOffCommand         'x'
+
+#define ackCommand              'A'
 
 void setup(void) {
 
