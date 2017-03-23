@@ -17,15 +17,15 @@ void processUserInteraction() {
       }
       //sendLEDWave(false, WAITING_CONNECTION_LED_SCAN_SPEED);
     }
-    else {
+    else if(buttonIsPressed && canEnterBrightnessSettingMode) {
       if (!switchStatus) {
-        currentLEDBrightness = minLEDLEDBrightness;
+        currentLEDBrightness = maxLEDLEDBrightness;
       }
       else if (switchStatus == 1) {
         currentLEDBrightness = mediumLEDLEDBrightness;
       }
       else {
-        currentLEDBrightness = maxLEDLEDBrightness;
+        currentLEDBrightness = minLEDLEDBrightness;
       }
       turnOnAllLEDs();
     }
@@ -39,6 +39,9 @@ void getUserInputs() {
   unsigned long currentMillis = millis();
 
   buttonIsPressed = digitalRead(buttonPin);
+  if(!buttonIsPressed) {
+    canEnterBrightnessSettingMode = true;
+  }
 
   boolean switchIsInPos1 = digitalRead(switchPos1Pin);
   boolean switchIsInPos2 = digitalRead(switchPos2Pin);

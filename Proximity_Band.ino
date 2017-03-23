@@ -81,6 +81,8 @@ float rgbLEDBrightnessAdjustments[3] = {1, 1, 0.5};
 boolean buttonIsPressed = 0;
 boolean prev_buttonIsPressed = 0;
 
+boolean canEnterBrightnessSettingMode = true;
+
 // -------------------- SWITCH --------------------
 
 byte switchStatus = 0;
