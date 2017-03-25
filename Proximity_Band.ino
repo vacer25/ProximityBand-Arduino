@@ -36,6 +36,7 @@ static const byte settings_version = B00000010;
 // -------------------- TIMINGS --------------------
 
 #define BLUETOOTH_CONNECTION_TIMEOUT 1000
+#define SUPPRESS_ALARM_INTERVAL 2000
 
 #define STARTUP_DELAY_TIME 1000
 
@@ -59,9 +60,10 @@ static const byte settings_version = B00000010;
 boolean alarmIsActive = false;
 boolean prev_alarmIsActive = false;
 boolean alarmIsInHighState = false;
+boolean alarmIsISuppressedState = false;
 
 unsigned long prev_alarmSwitchTime = 0;
-unsigned long prev_alarmRepeatTime = 0;
+unsigned long alarmSuppressStartTime = 0;
 
 // -------------------- PINS --------------------
 
@@ -147,6 +149,7 @@ int lastCommandSend = -1;
 
 #define alarmOnCommand          'X'
 #define alarmOffCommand         'x'
+#define alarmSuppressCommand    'Y'
 
 #define ackCommand              'A'
 
@@ -202,10 +205,18 @@ void error(const __FlashStringHelper*err) {
 
 void updateStatus() {
 
-  if (bluetoothConnected && millis() - lastBluetoothDataInTime > BLUETOOTH_CONNECTION_TIMEOUT) {
+  unsigned long currentMillis = millis();
+
+  if (bluetoothConnected && currentMillis - lastBluetoothDataInTime > BLUETOOTH_CONNECTION_TIMEOUT) {
     stopWaitingConnectionLEDFlasing();
     bluetoothConnected = false;
-    alarmIsActive = true;
+    if (!alarmIsISuppressedState || currentMillis - alarmSuppressStartTime > SUPPRESS_ALARM_INTERVAL) {
+      alarmIsActive = true;
+      alarmIsISuppressedState = false;
+    }
+    else {
+      setupWaitingConnectionLEDFlasing();
+    }
   }
 
   prev_switchStatus = switchStatus;

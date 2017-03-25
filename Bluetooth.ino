@@ -7,10 +7,11 @@ void getBluetoothData() {
   while (ble.available() /* || Serial.available() */)  {
 
     if (!bluetoothConnected) {
+      alarmIsISuppressedState = false;
       stopWaitingConnectionLEDFlasing();
     }
 
-    lastBluetoothDataInTime = millis();
+    lastBluetoothDataInTime = currentMillis;
     bluetoothConnected = true;
     int currentReadChar = ble.read();
     /*
@@ -18,7 +19,7 @@ void getBluetoothData() {
       currentReadChar = Serial.read();
     }
     */
-    //Serial.print((char)c);
+    Serial.print((char)currentReadChar);
 
     // -------------------- LEDs ON --------------------
 
@@ -90,6 +91,10 @@ void getBluetoothData() {
     }
     else if (currentReadChar == alarmOffCommand) {
       alarmIsActive = false;
+    }
+    else if (currentReadChar == alarmSuppressCommand) {
+      alarmIsISuppressedState = true;
+      alarmSuppressStartTime = currentMillis;
     }
 
     // -------------------- ACKNOLEGDEMENT --------------------

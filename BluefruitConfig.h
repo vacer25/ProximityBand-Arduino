@@ -5,7 +5,6 @@
 #define BUFSIZE                        128   // Size of the read buffer for incoming data
 #define VERBOSE_MODE                   false // If set to 'true' enables debug output
 
-
 // SOFTWARE UART SETTINGS
 // ----------------------------------------------------------------------------------------------
 // The following macros declare the pins that will be used for 'SW' serial.
