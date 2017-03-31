@@ -100,6 +100,7 @@ void getBluetoothData() {
     // -------------------- ACKNOLEGDEMENT --------------------
 
     else if (currentReadChar == ackCommand) {
+      Serial.println(F("ACK!"));
       didReceiveAck = true;
       lastCommandSend = -1;
     }
@@ -114,34 +115,39 @@ void sendBluetoothData() {
     return;
   }
 
-  if ((!switchIsBeingSwitched && prev_switchStatus != switchStatus)  || !didReceiveAck) {
+  if ((!switchIsBeingSwitched && prev_switchStatus != switchStatus)  || (!didReceiveAck && lastCommandSend < 3)) {
 
     if (!switchStatus || (!didReceiveAck && lastCommandSend == 0)) {
       ble.println("" switchPosition1Command);
+      Serial.println("" switchPosition1Command);
       didReceiveAck = false;
       lastCommandSend = 0;
     }
     else if (switchStatus == 1 || (!didReceiveAck && lastCommandSend == 1)) {
       ble.println(""switchPosition2Command);
+      Serial.println("" switchPosition2Command);
       didReceiveAck = false;
       lastCommandSend = 1;
     }
     else if (switchStatus == 2 || (!didReceiveAck && lastCommandSend == 2)) {
       ble.println("" switchPosition3Command);
+      Serial.println("" switchPosition3Command);
       didReceiveAck = false;
       lastCommandSend = 2;
     }
 
   }
 
-  if (buttonIsPressed != prev_buttonIsPressed || (!didReceiveAck && lastCommandSend == 3)) {
-    if (buttonIsPressed) {
+  if (buttonIsPressed != prev_buttonIsPressed || (!didReceiveAck && lastCommandSend >= 3)) {
+    if (buttonIsPressed || (!didReceiveAck &&  lastCommandSend == 3)) {
       ble.println("" buttonPressedCommand);
+      Serial.println("" buttonPressedCommand);
       didReceiveAck = false;
       lastCommandSend = 3;
     }
-    else if (!buttonIsPressed || (!didReceiveAck && lastCommandSend == 4)) {
+    else if (!buttonIsPressed || (!didReceiveAck &&  lastCommandSend == 4)) {
       ble.println("" buttonUnpressedCommand);
+      Serial.println("" buttonUnpressedCommand);
       didReceiveAck = false;
       lastCommandSend = 4;
     }
