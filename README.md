@@ -23,11 +23,6 @@ Set the switch to position 1 to turn on DnD mode.<br>
 Set the switch to position 2 or 3 to turn off DnD mode.<br>
 Let go of the button.<br>
 
-<b>Determining if the Bluetooth connection is active:</b><br>
-If any data via BLE is recieved, a timer is set for 1 second.<br>
-If no other data is recieved after the timer is done, this means that the connection is not active.<br>
-In this case the alarm will be acivated.<br>
-
 <b>Turning off the alarm:</b><br>
 In any case while the alarm is turned on, simply press the button.<br>
 This will stop the vibration and light flashing on the Proximity Band as well as the Android device (if it is still connected).<br>
@@ -39,6 +34,11 @@ This will stop the vibration and light flashing on the Proximity Band as well as
 
 ## Technical details:
 <pre>
+<b>Determining if the Bluetooth connection is active:</b>
+If any data via BLE is recieved, a timer is set for 1 second.
+If no other data is recieved after the timer is done, this means that the connection is not active.
+In this case the alarm will be acivated.
+
 <b>Connection to Bluetooth module using pins:</b>
 RX (Arduino) 	= 	D11
 TX (Arduino) 	= 	D12
